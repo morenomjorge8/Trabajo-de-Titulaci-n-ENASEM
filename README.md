@@ -2,6 +2,7 @@
 Contiene los scripts y bases de datos de un trabajo de titulación enfocado en encontrar las relaciones de variables socio económicas en la salud de los adultos mayores en México.
 
 * **Instituto Tecnológico Autónomo de México**
+*  Condiciones socioeconómicas y la salud de los adultos mayores en México
 * **Tesis para obtener el título de Licenciado en Economía**
 * **Presenta:** Jorge Luis Moreno Monreal 
 * **Asesora:** Dr. José Manuel Lecuanda Ontiveros
