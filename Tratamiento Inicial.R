@@ -161,8 +161,8 @@ df$c66_15[df$c66_15 == 888] <- NA
 summary(as.factor(df$c66_15))
 summary(df$c66_15) #¿Como cuántos kilos pesa usted ahora?
 
-summary(as.factor(df$c67_1_15)) #¿Como cuánto mide usted sin zapatos? – Metros
-summary(as.factor(df$c67_2_15)) #¿Como cuánto mide usted sin zapatos? – Centímetros
+summary(as.factor(df$c67_1_15)) #¿Como cuánto mide usted sin zapatos? - Metros
+summary(as.factor(df$c67_2_15)) #¿Como cuánto mide usted sin zapatos? - Centímetros
 
 df$c67_1_15[df$c67_1_15== 999] <- NA
 df$c67_1_15[df$c67_1_15 == 888] <- NA
@@ -247,22 +247,32 @@ df %>%
 
 #----
 
+#   0     1     2    11    12    13    14    15    70 
+# 315 11963    91  1267  1054    19     7    25    38
 # Ingreso, Gasto, Pensión, Transferencias
 df_income <- read.dta13("dta/2015/Income_2015.dta")
+summary(as.factor(df$subhog_15))
+df_income$subhog_15_2 <- df_income$subhog_15 
 
-df$subhog_15 <- as.numeric(df$subhog_15)
-df <- left_join(df,df_income,by = c("cunicah", "subhog_15", "np"))
+df <- df %>% 
+  mutate(
+    subhog_15_2 = if_else(subhog_15=="00.Baseline HH",0,
+                    if_else(subhog_15=="01.No change, HH contains NP=010",1,
+                      if_else(subhog_15=="02.No change, HH contains NP=020",2,
+                        if_else(subhog_15=="11.New HH contains NP=010",11,
+                          if_else(subhog_15=="12.New HH contains NP=020",12,
+                            if_else(subhog_15=="13.New HH contains NP=011",13,
+                              if_else(subhog_15=="14.New HH contains NP=021",14,
+                                if_else(subhog_15=="15.New HH contains NP=012",15,
+                                  if_else(subhog_15=="70.NP=010 & NP=020 separated, reunited",70,
+                                          NaN
+                                ))))))))))
 
-glimpse(df)
-
-df <- df[c("cunicah","np","subhog_15","factori_15","aes","laf","lavd",
-           "tabaquismo","hipertens","diabetes","obes","imc","kilos","n_hijos",
-           "altamigración","rural","escolaridad2","escolaridad","sexo_mujer",
-           "edad2","edad","IGNORAR",
-           "h1","h5","h6","h8","h9","h11","h12","h15","h16","h17","h18","h19")]
+summary(as.factor(df$subhog_15_2))
 
 
-write.csv(df,"resultados/DataFrame_Variables_brutas.csv")
+df <- left_join(df,df_income,by = c("cunicah", "subhog_15_2", "np"))
+
 
 
 
@@ -274,7 +284,41 @@ summary(as.factor(df_gasto$np))
 summary(as.factor(df$np))
 
 df_gasto$np2 <- df_gasto$np
-df$np2 <- df$np
 
 
-df2 <- left_join(df,df_gasto,by = c("cunicah", "subhog_15", "np2"))
+df <- df %>% 
+  mutate(
+    np2 = if_else(np=="10.Selected Respondent NP=010",10,
+          if_else(np=="11.Subsequent spouse of Resp NP=010",11,
+          if_else(np=="12.Subsequent spouse of Resp NP=010",12,
+          if_else(np=="13.Subsequent spouse of Resp NP=011",13,
+          if_else(np=="14.Subsequent spouse of Resp NP=010",14,
+          if_else(np=="15.Subsequent spouse of Resp NP=011",15,
+          if_else(np=="20.Spouse NP=020 of Resp NP=010",20,
+          if_else(np=="21.Subsequent spouse of Resp NP=020",21,
+          if_else(np=="22.Subsequent spouse of Resp NP=020",22,
+          if_else(np=="24.Subsequent spouse of Resp NP=020",24,       
+                  NaN
+                  )))))))))))
+
+df_gasto$subhog_15.x <- df_gasto$subhog_15
+
+df <- left_join(df, df_gasto, by = c("cunicah", "subhog_15.x", "np2"))
+
+
+#Guardar CSV de variables de interés
+df <- df[c("cunicah","np","subhog_15_2","factori_15","aes","laf","lavd",
+           "tabaquismo","hipertens","diabetes","obes","imc","kilos","n_hijos",
+           "altamigración","rural","escolaridad2","escolaridad","sexo_mujer",
+           "edad2","edad","IGNORAR",
+           "h1","h5","h6","h8","h9","h11","h12","h15","h16","h17","h18","h19",
+           
+           "income_15","inc_earned_15","inc_pension_15","inc_trans_15","inc_business_15",
+           "inc_property_15","inc_capital_15","inc_family_15",
+           
+           "amd6_15","amd9_1_15","amd9_3_15","amd9_4_15","amd12a_15","imamd6_15",
+           "imamd9_1_15","imamd9_2_15","imamd9_3_15","imamd9_4_15","imamd12a_15",
+           "d6_imp_15","d9_1_imp_15","d9_2_imp_15","d9_3_imp_15","d9_4_imp_15","d12a_imp_15"
+           )]
+
+write.csv(df,"resultados/DataFrame_Variables_brutas.csv")
